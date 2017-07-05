@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
 
 android {
     compileSdkVersion 25
@@ -15,6 +17,7 @@ android {
     }
     buildTypes {
         release {
+            publishNonDefault true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -28,4 +31,86 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
+}
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+group = 'com.mylibrary.v1'
+version = '0.1.1'
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name 'DeviceInfo'
+            description 'A library for finding out whether someone is on the naughty list or the nice list'
+            url 'https://github.com/Ramkumar810/DeviceControl'
+            inceptionYear '2017'
+            packaging 'aar'
+            groupId 'com.mylibrary.v1'
+            artifactId 'device'
+            version '0.1.1'
+            scm {
+                connection 'https://github.com/Ramkumar810/DeviceControl.git'
+                url 'https://github.com/Ramkumar810/DeviceControl'
+                developerConnection 'https://github.com/Ramkumar810/DeviceControl.git'
+
+            }
+           /* licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+            }*/
+            licenses {
+                license {
+                    name 'The MIT License (MIT)'
+                    url 'https://opensource.org/licenses/MIT'
+                }
+            }
+            developers {
+                developer {
+                    id 'Ramkumar' //YOUR ID
+                    name 'Ramkumar' //YOUR NAME
+                    email 'ramkumarperumal810@gmail.com' //YOUR EMAIL
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    Properties bintrayProperties = new Properties()
+    bintrayProperties.load(project.rootProject.file('bintray.properties').newDataInputStream())
+    user = bintrayProperties.getProperty("bintray.user")
+    key = bintrayProperties.get("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = 'maven'
+        name = 'DeviceInfo'
+        websiteUrl ='https://github.com/Ramkumar810/DeviceControl'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/Ramkumar810/DeviceControl.git'
+        publish = true
+        version {
+            name = '0.1.1'
+            desc = 'Naughty or Nice 0.1.1'
+            released = new Date()
+            vcsTag = 'v0.1.1'
+        }
+    }
 }
